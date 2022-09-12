@@ -11,6 +11,8 @@ const checkId = require("../middleware/checkId");
 const { adminJoi, Admin, loginJoi } = require("../models/Admin");
 const { Student, studentJoi } = require("../models/Student");
 const { Course, courseJoi } = require("../models/Course");
+const { Group, groupJoi } = require("../models/Group");
+const { Level, levelJoi } = require("../models/Level");
 
 //---------------------------------------  Admin section --------------------------------------
 
@@ -167,9 +169,76 @@ router.delete("/delete-course/:id" , checkAdmin, checkId , async (req , res ) =>
 
 //------------------------------ Dealing  with groups section ----------------------------------
 
+//get all groups
+router.get("/groups" , checkAdmin , async(req , res) => {
+    try {
+        const allGroups = await Group.find().select("-__v").populate("groupStudents")
+        res.json(allGroups)
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+})
+
+// add group 
+router.post("/add-group" , checkAdmin , validateBody(groupJoi) , async (req , res) => {
+    try {
+        const { groupName , groupStudents , groupCourses  } = req.body
+
+        const group = new Group ({groupName , groupStudents , groupCourses })
+        await group.save()
+        res.json(group)
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+}) 
+
+
+// delete group 
+router.delete("/delete-group/:id" , checkAdmin, checkId , async (req , res ) => {
+    try {
+         await Group.findByIdAndRemove(req.params.id)
+        res.send("Group removed")
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+})
 
 //
 
 //------------------------------ Dealing  with levels section ----------------------------------
 
+
+//get all levels
+router.get("/levels" , checkAdmin , async(req , res) => {
+    try {
+        const allLevels = await Level.find().select("-__v").populate("levelCourses").populate("levelGroups")
+        res.json(allLevels)
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+})
+
+// add level 
+router.post("/add-level" , checkAdmin , validateBody(levelJoi) , async (req , res) => {
+    try {
+        const { levelNum , levelGroups , levelCourses } = req.body
+
+        const level = new Level ({ levelNum ,levelGroups , levelCourses})
+        await level.save()
+        res.json(level)
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+}) 
+
+
+// delete level 
+router.delete("/delete-level/:id" , checkAdmin, checkId , async (req , res ) => {
+    try {
+         await Level.findByIdAndRemove(req.params.id)
+        res.send("Level removed")
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+})
 module.exports = router;

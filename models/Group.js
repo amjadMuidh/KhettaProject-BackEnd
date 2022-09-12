@@ -15,7 +15,7 @@ const groupSchema = new mongoose.Schema({
 })
 
 const groupJoi = Joi.object({
-    groupName: Joi.string().min().max(10).required(),
+    groupName: Joi.string().min(1).max(10).required(),
     groupStudents:Joi.objectid(),
     groupCourses: Joi.objectid()
 })
